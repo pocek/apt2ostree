@@ -11,7 +11,7 @@ if sys.version_info[0] >= 3:
     from urllib.parse import unquote
 else:
     from urllib import unquote
-from collections import namedtuple
+from typing import NamedTuple, Sequence
 
 from .ninja import Rule
 from .ostree import ostree_addfile, ostree_combine, OstreeRef
@@ -319,8 +319,14 @@ dpkg_configure = Rule(
     pool="console")
 
 
-AptSource = namedtuple(
-    "AptSource", "architecture distribution archive_url components keyrings")
+class AptSource(NamedTuple):
+    architecture: str
+    distribution: str
+    archive_url: str
+    components: str
+    keyrings: Sequence
+    force_architectures: bool = False
+    force_components: bool = False
 
 
 _UBUNTU_RELEASES = {
@@ -493,9 +499,14 @@ class Apt(object):
                 "-keyring=" + x.replace("$apt2ostreedir", this_dir_rel)
                 for x in src.keyrings]
             all_keyring_args = all_keyring_args.union(keyring_arg)
+            extra_args = []
+            if src.force_architectures:
+                extra_args.append('-force-architectures')
+            if src.force_components:
+                extra_args.append('-force-components')
             cmd = [
                 "aptly", "mirror", "create",
-                "-architectures=" + src.architecture] + keyring_arg + [
+                "-architectures=" + src.architecture] + keyring_arg + extra_args + [
                 "-gpg-provider=internal",
                 "mirror-%i" % n, src.archive_url,
                 src.distribution] + src.components.split()
