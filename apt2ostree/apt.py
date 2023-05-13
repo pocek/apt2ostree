@@ -335,9 +335,7 @@ _UBUNTU_RELEASES = {
 def ubuntu_apt_sources(release="bionic", architecture="amd64"):
     if release in _UBUNTU_RELEASES:
         release = _UBUNTU_RELEASES[release]
-    if release in ["trusty", "xenial"]:
-        archive_url = "https://old-releases.ubuntu.com/ubuntu"
-    elif architecture in ["amd64", "i386"]:
+    if architecture in ["amd64", "i386"]:
         archive_url = "http://archive.ubuntu.com/ubuntu"
     else:
         archive_url = "http://ports.ubuntu.com/ubuntu-ports"
