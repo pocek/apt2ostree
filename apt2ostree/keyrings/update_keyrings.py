@@ -60,7 +60,7 @@ def get_keyring_package(distro, release, package_download_url):
         sys.stderr.write("%s\n" % tmp)
         os.makedirs(_find_file(distro), exist_ok=True)
         try:
-            os.rename("%s/etc/apt/trusted.gpg.d" % tmp,
+            shutil.move("%s/etc/apt/trusted.gpg.d" % tmp,
                       _find_file("%s/%s" % (distro, release)))
         except IOError:
             sys.stderr.write(
