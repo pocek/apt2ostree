@@ -36,11 +36,12 @@ ostree_addfile = Rule(
     "file_into_ostree", """\
     set -ex;
     tmpdir=$$(mktemp -dt ostree_adddir.XXXXXX);
-    cp $in_file $$tmpdir;
+    mkdir -p $$tmpdir/$prefix;
+    cp $in_file $$tmpdir/$prefix;
     ostree --repo=$ostree_repo commit --devino-canonical -b $out_branch
            --no-bindings --orphan --timestamp=0
            --tree=ref=$in_branch
-           --tree=prefix=$prefix --tree=dir=$$tmpdir
+           --tree=dir=$$tmpdir
            --owner-uid=0 --owner-gid=0;
     rm -rf $$tmpdir;
     """,
