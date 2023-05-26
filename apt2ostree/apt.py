@@ -17,9 +17,6 @@ from .ninja import Rule
 from .ostree import ostree_addfile, ostree_combine, OstreeRef
 
 
-DEB_POOL_MIRRORS = []
-
-
 update_lockfile = Rule("update_lockfile", """\
     set -ex;
     export tmpdir="_build/tmp/update_lockfile/$$(systemd-escape $out)";
@@ -97,10 +94,6 @@ apt_base = Rule(
     outputs=["$ostree_repo/refs/heads/deb/apt_base/$_args_digest"],
     order_only=["$ostree_repo/config"], restat=True)
 
-# Ninja will rebuild the target if the contents of the rule changes.  We don't
-# want to redownload a deb just because the list of mirrors has changed, so
-# instead we write _build/deb_pool_mirrors and explicitly **don't** declare a
-# dependency on it.
 download_deb = Rule(
     "download_deb", """\
         download() {
@@ -118,11 +111,9 @@ download_deb = Rule(
         set -ex;
         tmpdir=$builddir/tmp/download-deb/$aptly_pool_filename;
         mkdir -p "$$tmpdir";
-        while read mirror; do
-            download file://$$PWD/$builddir/apt/mirror/${filename} && break;
-            download $$mirror/${filename} && break;
-            download $$mirror/$aptly_pool_filename && break;
-        done <$builddir/deb_pool_mirrors;
+        download file://$$PWD/$builddir/apt/mirror/${filename} ||
+        download $mirror/${filename} ||
+        download $mirror/$aptly_pool_filename;
         if ! [ -e $$tmpdir/deb ]; then
             echo Failed to download ${filename};
             exit 1;
@@ -375,13 +366,9 @@ def keyrings_for(distro, release):
 
 
 class Apt(object):
-    def __init__(self, ninja, deb_pool_mirrors=None, apt_should_mirror=False):
-        if deb_pool_mirrors is None:
-            deb_pool_mirrors = DEB_POOL_MIRRORS
-
+    def __init__(self, ninja, apt_should_mirror=False):
         self.ninja = ninja
         self.archive_urls = set()
-        self.deb_pool_mirrors = deb_pool_mirrors
         self.lockfile_rules = set()
 
         ninja.variable("apt_should_mirror", str(bool(apt_should_mirror)))
@@ -547,12 +534,6 @@ class Apt(object):
         all_status = []
         all_available = []
 
-        with self.ninja.open('_build/deb_pool_mirrors', 'w') as f:
-            for x in self.deb_pool_mirrors:
-                f.write(x + "\n")
-            for x in self.archive_urls:
-                f.write(x + "\n")
-
         try:
             with self.ninja.open(lockfile) as f:
                 for pkg in parse_packages(f):
@@ -565,6 +546,7 @@ class Apt(object):
                     data, _ = download_deb.build(
                         self.ninja, sha256sum=pkg['SHA256'], filename=filename,
                         aptly_pool_filename=aptly_pool_filename,
+                        mirror=pkg['X-Archive-Root'],
                         ref_base=ref_base)
                     if usrmove:
                         data = do_usrmove.build(
