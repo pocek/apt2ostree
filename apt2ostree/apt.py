@@ -384,8 +384,8 @@ class Apt(object):
                          inputs=list(self.lockfile_rules))
 
     def build_image(self, lockfile, packages, apt_sources, unpack_only=False,
-                    usrmove=False, resolve_deps=True):
-        self.generate_lockfile(lockfile, packages, apt_sources, resolve_deps)
+                    usrmove=False, lockfile_create_args=None):
+        self.generate_lockfile(lockfile, packages, apt_sources, lockfile_create_args)
         stage_1 = self.image_from_lockfile(
             lockfile, apt_sources[0].architecture, usrmove)
         sources_lists = []
@@ -464,7 +464,7 @@ class Apt(object):
         return configured_ref
 
     def generate_lockfile(self, lockfile, packages, apt_sources,
-                          resolve_deps=True):
+                          lockfile_create_args=None):
         packages = sorted(packages)
 
         this_dir_rel = os.path.relpath(
@@ -508,10 +508,9 @@ class Apt(object):
                 f.write(x + "\n")
             os.fchmod(f.fileno(), 0o755)
 
-        if not resolve_deps:
-            all_keyring_args = all_keyring_args.union([
-                "-solver=no-deps", "-include-essential=false",
-                "-include-priority-required=false"])
+
+        if lockfile_create_args:
+            all_keyring_args = all_keyring_args.union(lockfile_create_args)
 
         out = update_lockfile.build(
             self.ninja,
