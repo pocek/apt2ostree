@@ -13,6 +13,8 @@ else:
     from urllib import unquote
 from typing import NamedTuple, Sequence
 
+from apt_pkg import TagFile
+
 from .ninja import Rule
 from .ostree import ostree_addfile, ostree_combine, OstreeRef
 
@@ -637,22 +639,8 @@ class Apt(object):
 
 def parse_packages(stream):
     """Parses an apt Packages file"""
-    pkg = {}
-    label = None
-    for line in stream:
-        if line.strip() == '':
-            if pkg:
-                yield pkg
-            pkg = {}
-            label = None
-            continue
-        elif line == ' .':
-            pkg[label] += '\n\n'
-        elif line.startswith(" "):
-            pkg[label] += '\n' + line[1:].strip()
-        else:
-            label, data = line.split(': ', 1)
-            pkg[label] = data.strip()
+    with TagFile(stream) as tagfile:
+        yield from tagfile
 
 
 def mkdir_p(d):
