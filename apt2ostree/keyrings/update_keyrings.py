@@ -24,7 +24,7 @@ def main(argv):
             "ubuntu", x,
             "https://packages.ubuntu.com/%s/all/ubuntu-keyring/download" % x)
 
-    for x in ["buster", "bullseye", "sid"]:
+    for x in ["buster", "bullseye", "bookworm", "sid"]:
         print(x)
         get_keyring_package(
             "debian", x,
