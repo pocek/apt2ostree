@@ -49,4 +49,4 @@ ostree_addfile = Rule(
     inputs=["$ostree_repo/refs/heads/$in_branch", "$in_file"],
     output_type=OstreeRef,
     outputs=["$ostree_repo/refs/heads/$out_branch"],
-    description="Add file $in_branch")
+    description="Add file $in_file")
