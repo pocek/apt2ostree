@@ -33,7 +33,7 @@ ostree_combine = Rule(
     description="Ostree Combine for $branch")
 
 ostree_addfile = Rule(
-    "file_into_ostree", """\
+    "ostree_addfile", """\
     set -ex;
     tmpdir=$$(mktemp -dt ostree_adddir.XXXXXX);
     mkdir -p $$tmpdir/$prefix;
