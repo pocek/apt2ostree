@@ -511,8 +511,10 @@ class Apt(object):
             os.fchmod(f.fileno(), 0o755)
 
 
+        all_keyring_args = list(all_keyring_args)
+
         if lockfile_create_args:
-            all_keyring_args = all_keyring_args.union(lockfile_create_args)
+            all_keyring_args += lockfile_create_args
 
         out = update_lockfile.build(
             self.ninja,
