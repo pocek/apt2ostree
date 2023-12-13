@@ -320,6 +320,7 @@ class AptSource(NamedTuple):
     keyrings: Sequence
     force_architectures: bool = False
     force_components: bool = False
+    optional: bool = False
 
 
 _UBUNTU_RELEASES = {
