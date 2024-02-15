@@ -21,7 +21,7 @@ from .ostree import ostree_addfile, ostree_combine, OstreeRef
 
 update_lockfile = Rule("update_lockfile", """\
     set -ex;
-    export tmpdir="_build/tmp/update_lockfile/$$(systemd-escape $out)";
+    export tmpdir="$builddir/tmp/update_lockfile/$$(systemd-escape $out)";
     rm -rf $$tmpdir;
     mkdir -p $$tmpdir;
     export HOME=$$tmpdir;
@@ -42,7 +42,7 @@ update_lockfile = Rule("update_lockfile", """\
 dpkg_base = Rule(
     "dpkg_base", """\
     set -ex;
-    tmpdir=_build/tmp/apt/dpkg-base/$architecture;
+    tmpdir=$builddir/tmp/apt/dpkg-base/$architecture;
     rm -rf "$$tmpdir";
     mkdir -p $$tmpdir;
     cd $$tmpdir;
@@ -502,8 +502,8 @@ class Apt(object):
                 src.distribution] + src.components.split()
             gen_mirror_cmds.append(" ".join(pipes.quote(x) for x in cmd))
 
-        create_mirrors = "_build/apt/lockfile/create_mirrors-%s" % (
-            s.hexdigest()[:7])
+        create_mirrors = "%s/apt/lockfile/create_mirrors-%s" % (
+            self.ninja.builddir, s.hexdigest()[:7])
         mkdir_p(os.path.dirname(create_mirrors))
         with self.ninja.open(create_mirrors, "w") as f:
             f.write("#!/bin/sh -ex\n")
