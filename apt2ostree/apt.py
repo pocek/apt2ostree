@@ -557,8 +557,7 @@ class Apt(object):
                             self.ninja,
                             in_branch=data.ref,
                             out_branch=data.ref + '-usrmove')
-                    data = self.fix_package(
-                        pkg['Package'], pkg['Version'], data)
+                    data = self.fix_package(pkg, data)
                     all_data.append(data.filename)
                     status, available, info = make_dpkg_info.build(
                         self.ninja, sha256sum=pkg['SHA256'],
@@ -600,11 +599,13 @@ class Apt(object):
                          "phony", inputs=image.filename)
         return image
 
-    def fix_package(self, pkgname, version, data):
+    def fix_package(self, pkg, data):
         """
         Here we can apply quirks as required to get particular packages to
         install.
         """
+        pkgname = pkg['Package']
+        version = pkg['Version']
         if pkgname == 'pylint' and version < "2.1.1-2":
             # This is a backport of :
             #
