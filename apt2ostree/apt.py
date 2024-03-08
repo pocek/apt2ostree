@@ -30,7 +30,7 @@ update_lockfile = Rule("update_lockfile", """\
         -mirrors "$mirrors"
         -architectures=$architecture
         $keyring_arg -gpg-provider=internal
-        $packages >$lockfile~;
+        >$lockfile~;
     if cmp $lockfile~ $lockfile; then
         rm $lockfile~;
     else
@@ -520,7 +520,6 @@ class Apt(object):
         out = update_lockfile.build(
             self.ninja,
             lockfile=lockfile,
-            packages=packages,
             create_mirrors=create_mirrors,
             mirrors=",".join(mirrors),
             architecture=apt_sources[0].architecture,
