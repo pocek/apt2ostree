@@ -14,7 +14,6 @@ class OstreeRef(namedtuple("OstreeImage", "filename")):
 
 
 ostree = Rule("ostree", """\
-    mkdir $ostree_repo;
     ostree init --repo=$ostree_repo --mode=bare-user;
     """, outputs=['$ostree_repo/config'], restat=True)
 
