@@ -4,8 +4,8 @@ import errno
 import glob
 import hashlib
 import os
-import pipes
 import platform
+import shlex
 import sys
 if sys.version_info[0] >= 3:
     from urllib.parse import unquote
@@ -500,7 +500,7 @@ class Apt(object):
                 "-gpg-provider=internal",
                 "mirror-%i" % n, src.archive_url,
                 src.distribution] + src.components.split()
-            gen_mirror_cmds.append(" ".join(pipes.quote(x) for x in cmd))
+            gen_mirror_cmds.append(" ".join(shlex.quote(x) for x in cmd))
 
         create_mirrors = "%s/apt/lockfile/create_mirrors-%s" % (
             self.ninja.builddir, s.hexdigest()[:7])
