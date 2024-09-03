@@ -26,7 +26,7 @@ def read_multistrap_config(ninja, config_file):
             architecture=get("General", "arch") or "amd64",
             distribution=get(section, "suite"),
             archive_url=get(section, "source"),
-            components=get(section, "components"),
+            components=get(section, "components").split(),
             keyrings=get_keyring(get(section, "source"), get(section, "suite"))))
         packages += get(section, "packages", "").split()
 

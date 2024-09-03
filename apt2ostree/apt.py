@@ -316,7 +316,7 @@ class AptSource(NamedTuple):
     architecture: str
     distribution: str
     archive_url: str
-    components: str
+    components: Sequence
     keyrings: Sequence
     force_architectures: bool = False
     force_components: bool = False
@@ -341,13 +341,13 @@ def ubuntu_apt_sources(release="bionic", architecture="amd64"):
         archive_url = "http://ports.ubuntu.com/ubuntu-ports"
     return [
         AptSource(architecture, release, archive_url,
-                  "main restricted universe multiverse",
+                  "main restricted universe multiverse".split(),
                   keyrings_for("ubuntu", release)),
         AptSource(architecture, "%s-updates" % release, archive_url,
-                  "main restricted universe multiverse",
+                  "main restricted universe multiverse".split(),
                   keyrings_for("ubuntu", "%s-updates" % release)),
         AptSource(architecture, "%s-security" % release, archive_url,
-                  "main restricted universe multiverse",
+                  "main restricted universe multiverse".split(),
                   keyrings_for("ubuntu", "%s-security" % release)),
     ]
 
@@ -395,7 +395,7 @@ class Apt(object):
         for n, apt_source in enumerate(apt_sources):
             sources_lists.append(apt_base.build(
                 self.ninja, archive_url=apt_source.archive_url,
-                components=apt_source.components,
+                components=' '.join(apt_source.components),
                 architecture=apt_source.architecture,
                 distribution=apt_source.distribution,
                 name="apt2ostree-%i" % n))
@@ -499,7 +499,7 @@ class Apt(object):
                 "-architectures=" + src.architecture] + keyring_arg + extra_args + [
                 "-gpg-provider=internal",
                 "mirror-%i" % n, src.archive_url,
-                src.distribution] + src.components.split()
+                src.distribution] + src.components
             gen_mirror_cmds.append(" ".join(shlex.quote(x) for x in cmd))
 
         create_mirrors = "%s/apt/lockfile/create_mirrors-%s" % (
