@@ -388,7 +388,7 @@ class Apt(object):
 
     def build_image(self, lockfile, packages, apt_sources, unpack_only=False,
                     usrmove=False, lockfile_create_args=None):
-        self.generate_lockfile(lockfile, packages, apt_sources, lockfile_create_args)
+        self.generate_lockfile(lockfile, apt_sources, lockfile_create_args)
         stage_1 = self.image_from_lockfile(
             lockfile, apt_sources[0].architecture, usrmove)
         sources_lists = []
@@ -466,10 +466,7 @@ class Apt(object):
             binfmt_misc_support=binfmt_misc_support)
         return configured_ref
 
-    def generate_lockfile(self, lockfile, packages, apt_sources,
-                          lockfile_create_args=None):
-        packages = sorted(packages)
-
+    def generate_lockfile(self, lockfile, apt_sources, lockfile_create_args=None):
         this_dir_rel = os.path.relpath(
             os.path.dirname(os.path.abspath(__file__)))
 
