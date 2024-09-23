@@ -245,7 +245,7 @@ deb_combine_meta = Rule(
     tmpdir=$builddir/tmp/deb_combine_$meta/$pkgs_digest;
     rm -rf "$$tmpdir";
     mkdir -p "$$tmpdir/var/lib/dpkg";
-    cat $in >$$tmpdir/var/lib/dpkg/$meta;
+    xargs -d "\\n" -a ${builddir}/${pkgs_digest}-${meta}.rsp cat >$$tmpdir/var/lib/dpkg/$meta;
     ostree --repo=$ostree_repo commit -b "deb/images/$pkgs_digest/$meta"
         --tree=dir=$$tmpdir --no-bindings --orphan --timestamp=0
         --owner-uid=0 --owner-gid=0 --no-xattrs;
@@ -255,7 +255,9 @@ deb_combine_meta = Rule(
     output_type=OstreeRef,
     outputs=["$ostree_repo/refs/heads/deb/images/$pkgs_digest/$meta"],
     order_only=["$ostree_repo/config"],
-    description="var/lib/dpkg/$meta for $pkgs_digest")
+    description="var/lib/dpkg/$meta for $pkgs_digest",
+    rspfile="${builddir}/${pkgs_digest}-${meta}.rsp",
+    rspfile_content="$in_newline")
 
 
 # This is a really naive implementation calling `dpkg --configure -a` in a
