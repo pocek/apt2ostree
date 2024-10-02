@@ -266,7 +266,7 @@ class Rule(object):
             inputs.extend(ninja_syntax.expand(x, ninja.global_vars, kwargs)
                           for x in self.inputs)
         if self.implicit:
-            inputs.extend(ninja_syntax.expand(x, ninja.global_vars, kwargs)
+            implicit.extend(ninja_syntax.expand(x, ninja.global_vars, kwargs)
                           for x in self.implicit)
 
         ninja.newline()
