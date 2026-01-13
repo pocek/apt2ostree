@@ -1,0 +1,43 @@
+#!/usr/bin/python3
+
+import os
+import subprocess as sp
+import sys
+
+
+for filename in sys.argv[1:]:
+    # Perhaps there is a better way, but crazy gpg CLI makes me furious
+    proc = sp.Popen(['gpg', '--import-options', 'import-export', '--import', '--armor', filename],
+                    stdout=sp.PIPE, encoding='utf-8')
+
+    for line in proc.stdout:
+        if line == '-----BEGIN PGP PUBLIC KEY BLOCK-----\n':
+            try:
+                os.unlink('tmp')
+            except FileNotFoundError:
+                pass
+            proc2 = sp.Popen(['gpg', '--output', 'tmp', '--dearmor'], stdin=sp.PIPE, encoding='utf-8')
+            proc2.stdin.write(line)
+        elif line == '-----END PGP PUBLIC KEY BLOCK-----\n':
+            proc2.stdin.write(line)
+            proc2.stdin.close()
+            rc = proc2.wait()
+            assert rc == 0
+
+            proc3 = sp.Popen(['gpg', '--with-colons', '--show-keys', 'tmp'], stdout=sp.PIPE, encoding='utf-8')
+            line = proc3.stdout.readline()
+            s = line.split(':')
+            keyid = s[4]
+            proc3.terminate()
+            rc = proc3.wait()
+            assert rc == 0
+            if s[1] == 'e':
+                # expired key - drop it
+                os.unlink('tmp')
+            else:
+                os.rename('tmp', f'{keyid}.gpg')
+        else:
+            proc2.stdin.write(line)
+
+    rc = proc.wait()
+    assert rc == 0
