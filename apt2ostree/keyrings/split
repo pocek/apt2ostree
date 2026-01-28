@@ -33,8 +33,6 @@ for filename in sys.argv[1:]:
             rc = proc3.wait()
             assert rc == 0, 'show keys failed'
             if s[1] == 'e':
-                # expired key - drop it
-                #os.unlink('tmp')
                 os.rename('tmp', f'{keyid}.expired.gpg')
             else:
                 os.rename('tmp', f'{keyid}.gpg')
