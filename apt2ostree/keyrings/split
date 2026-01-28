@@ -22,22 +22,24 @@ for filename in sys.argv[1:]:
             proc2.stdin.write(line)
             proc2.stdin.close()
             rc = proc2.wait()
-            assert rc == 0
+            assert rc == 0, 'dearmor failed'
 
             proc3 = sp.Popen(['gpg', '--with-colons', '--show-keys', 'tmp'], stdout=sp.PIPE, encoding='utf-8')
             line = proc3.stdout.readline()
             s = line.split(':')
             keyid = s[4]
-            proc3.terminate()
+            # This makes gpg exit with non-zero exit code - skip it.
+            #proc3.terminate()
             rc = proc3.wait()
-            assert rc == 0
+            assert rc == 0, 'show keys failed'
             if s[1] == 'e':
                 # expired key - drop it
-                os.unlink('tmp')
+                #os.unlink('tmp')
+                os.rename('tmp', f'{keyid}.expired.gpg')
             else:
                 os.rename('tmp', f'{keyid}.gpg')
         else:
             proc2.stdin.write(line)
 
     rc = proc.wait()
-    assert rc == 0
+    assert rc == 0, 'import-export failed'
